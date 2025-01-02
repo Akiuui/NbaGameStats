@@ -1,11 +1,13 @@
 from flask import Flask, jsonify, request
 from nba_api.stats.endpoints import scoreboardv2, boxscoretraditionalv3
 from nba_api.stats.static import teams
+from flask_cors import CORS
 # import time
 import logging
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)  # This prints logs to the console
+CORS(app)
 
 
 def getTeamIdByAbbr(teamAbbr):
