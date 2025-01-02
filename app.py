@@ -35,7 +35,7 @@ def getAll():
 
     # start_time = time.time()
     try:
-        scoreboard = scoreboardv2.ScoreboardV2(game_date=date)#First we get the games played based on the date
+        scoreboard = scoreboardv2.ScoreboardV2(game_date=date, timeout=90)#First we get the games played based on the date
     except Exception as e:
         logging.error("error: Failed to fetch scoreboard")
         return jsonify({"error": f"Failed to fetch scoreboard: {str(e)}"}), 500
