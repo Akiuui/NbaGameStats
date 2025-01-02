@@ -1,9 +1,12 @@
 from flask import Flask, jsonify, request
 from nba_api.stats.endpoints import scoreboardv2, boxscoretraditionalv3
 from nba_api.stats.static import teams
-import time
+# import time
+import logging
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.DEBUG)  # This prints logs to the console
+
 
 def getTeamIdByAbbr(teamAbbr):
     team = teams.find_team_by_abbreviation(teamAbbr)
@@ -15,10 +18,11 @@ def getGameIdByTeam(gamesIds, hometeamsIds, visitorTeamsIds, teamId):
     for i in range(len(gamesIds)):
         if(hometeamsIds[i] == teamId or visitorTeamsIds[i] == teamId):
             return gamesIds[i]
-    return jsonify({"error": "No game found for the specified team and date"}), 404
+    return None
 
 @app.route('/gameStat', methods=['GET'])
 def getAll():
+    logging.info("Endpoint called")
     #First we get the params we use to query for the games stats
     date = request.args.get('date')
     teamAbbr = request.args.get('teamAbbr')
@@ -26,12 +30,12 @@ def getAll():
     if not date or not teamAbbr:
         return jsonify({"error": "Missing required parameters: 'date' and 'teamAbbr'"}), 400
 
-    start_time = time.time()
+    # start_time = time.time()
     try:
         scoreboard = scoreboardv2.ScoreboardV2(game_date=date)#First we get the games played based on the date
     except Exception as e:
         return jsonify({"error": f"Failed to fetch scoreboard: {str(e)}"}), 500
-    print("Scoreboard fetch time:", time.time() - start_time)
+    # print("Scoreboard fetch time:", time.time() - start_time)
 
     #We convert our response to a data fram and get certain colums we need
     df = scoreboard.get_data_frames()[0][["GAME_ID", "HOME_TEAM_ID", "VISITOR_TEAM_ID"]]
@@ -43,13 +47,16 @@ def getAll():
     #We get the id of our inputed param teamAbbbr
     teamId=getTeamIdByAbbr(teamAbbr=teamAbbr)
     ourGameId = getGameIdByTeam(gamesIds=gameId, hometeamsIds=homeTeamId, visitorTeamsIds=visitorTeamId, teamId=teamId)
+    print("Out game id",ourGameId)
 
-    start_time = time.time()
+    if not ourGameId:
+        return jsonify({"error": "No game found for the specified team and date"}), 404
+    # start_time = time.time()
     try:
         boxscore = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=ourGameId)
     except Exception as e:
         return jsonify({"error": f"Failed to fetch boxScore: {str(e)}"}), 500
-    print("Boxscore fetch time:", time.time() - start_time)
+    # print("Boxscore fetch time:", time.time() - start_time)
 
 
     playerStats = boxscore.get_data_frames()[0]
@@ -62,4 +69,4 @@ def getAll():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
