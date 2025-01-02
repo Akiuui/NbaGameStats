@@ -20,20 +20,24 @@ def getGameIdByTeam(gamesIds, hometeamsIds, visitorTeamsIds, teamId):
             return gamesIds[i]
     return None
 
-@app.route('/gameStat', methods=['GET'])
+@app.route('/', methods=['GET'])
 def getAll():
     logging.info("Endpoint called")
     #First we get the params we use to query for the games stats
     date = request.args.get('date')
     teamAbbr = request.args.get('teamAbbr')
 
+    logging.info(f"PARAMS: date: {date}, teamAbbr: {teamAbbr}")
+
     if not date or not teamAbbr:
+        logging.error("error: Missing required parameters: 'date' and 'teamAbbr'")
         return jsonify({"error": "Missing required parameters: 'date' and 'teamAbbr'"}), 400
 
     # start_time = time.time()
     try:
         scoreboard = scoreboardv2.ScoreboardV2(game_date=date)#First we get the games played based on the date
     except Exception as e:
+        logging.error("error: Failed to fetch scoreboard")
         return jsonify({"error": f"Failed to fetch scoreboard: {str(e)}"}), 500
     # print("Scoreboard fetch time:", time.time() - start_time)
 
@@ -47,7 +51,8 @@ def getAll():
     #We get the id of our inputed param teamAbbbr
     teamId=getTeamIdByAbbr(teamAbbr=teamAbbr)
     ourGameId = getGameIdByTeam(gamesIds=gameId, hometeamsIds=homeTeamId, visitorTeamsIds=visitorTeamId, teamId=teamId)
-    print("Out game id",ourGameId)
+
+    logging.info(f"Our Game Id {ourGameId}")
 
     if not ourGameId:
         return jsonify({"error": "No game found for the specified team and date"}), 404
