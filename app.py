@@ -36,29 +36,31 @@ def getAll():
         return jsonify({"error": "Missing required parameters: 'date' and 'teamAbbr'"}), 400
 
     # start_time = time.time()
-    try:
-        scoreboard = scoreboardv2.ScoreboardV2(game_date=date, timeout=90)#First we get the games played based on the date
-    except Exception as e:
-        logging.error("error: Failed to fetch scoreboard")
-        return jsonify({"error": f"Failed to fetch scoreboard: {str(e)}"}), 500
-    # print("Scoreboard fetch time:", time.time() - start_time)
+    # try:
+    #     scoreboard = scoreboardv2.ScoreboardV2(game_date=date, timeout=90)#First we get the games played based on the date
+    #     print("The endpoint: ",scoreboard.get_request_url())
+    # except Exception as e:
+    #     logging.error("error: Failed to fetch scoreboard")
+    #     return jsonify({"error": f"Failed to fetch scoreboard: {str(e)}"}), 500
+    # # print("Scoreboard fetch time:", time.time() - start_time)
 
-    #We convert our response to a data fram and get certain colums we need
-    df = scoreboard.get_data_frames()[0][["GAME_ID", "HOME_TEAM_ID", "VISITOR_TEAM_ID"]]
-    #We convert the data frame into three array for easier use
-    gameId = list(df["GAME_ID"])
-    visitorTeamId = list(df["HOME_TEAM_ID"])
-    homeTeamId = list(df["VISITOR_TEAM_ID"])
+    # #We convert our response to a data fram and get certain colums we need
+    # df = scoreboard.get_data_frames()[0][["GAME_ID", "HOME_TEAM_ID", "VISITOR_TEAM_ID"]]
+    # #We convert the data frame into three array for easier use
+    # gameId = list(df["GAME_ID"])
+    # visitorTeamId = list(df["HOME_TEAM_ID"])
+    # homeTeamId = list(df["VISITOR_TEAM_ID"])
 
-    #We get the id of our inputed param teamAbbbr
-    teamId=getTeamIdByAbbr(teamAbbr=teamAbbr)
-    ourGameId = getGameIdByTeam(gamesIds=gameId, hometeamsIds=homeTeamId, visitorTeamsIds=visitorTeamId, teamId=teamId)
+    # #We get the id of our inputed param teamAbbbr
+    # teamId=getTeamIdByAbbr(teamAbbr=teamAbbr)
+    # ourGameId = getGameIdByTeam(gamesIds=gameId, hometeamsIds=homeTeamId, visitorTeamsIds=visitorTeamId, teamId=teamId)
 
-    logging.info(f"Our Game Id {ourGameId}")
+    # logging.info(f"Our Game Id {ourGameId}")
 
-    if not ourGameId:
-        return jsonify({"error": "No game found for the specified team and date"}), 404
+    # if not ourGameId:
+    #     return jsonify({"error": "No game found for the specified team and date"}), 404
     # start_time = time.time()
+    ourGameId = "0021900737"
     try:
         boxscore = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=ourGameId)
     except Exception as e:
