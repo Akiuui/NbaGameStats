@@ -84,6 +84,11 @@ def getAll():
 
     return jsonify(filteredStatsDict)
 
+import os
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    from waitress import serve
+
+    port=int(os.environ.get("PORT", 8080))
+    serve(app, host="0.0.0.0", port=port)
+    # app.run(debug=False)
